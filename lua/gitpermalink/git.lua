@@ -2,6 +2,9 @@ local util = require("gitpermalink.util")
 
 local M = {}
 
+---@enum Platforms
+M.Platforms = { GITHUB = 1, CODEBERG = 2 }
+
 ---@class RepositoryInfo
 ---@field host string
 ---@field user string
@@ -46,7 +49,27 @@ M.parse_remote = function(remote)
 	return { host = host, user = user, repo = repository }
 end
 
+--- Gets the git platform (github, codebert, ...) based on the host
+---@param host string
+---@return Platforms
+M.get_git_platform = function(host)
+	if host:match("github") then
+		return M.Platforms.GITHUB
+	elseif host:match("codeberg") then
+		return M.Platforms.CODEBERG
+	else
+		error("platform not supported")
+	end
+end
+
+--- Gets the commit hash for the provided refname
+---@param refname string?: If not provided it will be HEAD
+---@return string
 M.get_commit_hash = function(refname)
+	if refname == nil then
+		refname = "HEAD"
+	end
+
 	local obj = vim.system({ "git", "rev-parse", refname }, { test = true }):wait()
 
 	if obj["code"] ~= 0 then

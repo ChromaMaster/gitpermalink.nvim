@@ -7,6 +7,8 @@ local Helper = {}
 M.config = {
 	git_executable = "git",
 	notify = vim.notify,
+	copy_to_reg = true,
+	reg = "+",
 }
 
 M.setup = function()
@@ -27,35 +29,30 @@ M.setup = function()
 	Helper.fetch_repo_info()
 end
 
---- Generates a permalink for the given region
----@param start_line integer: Starting line
----@param end_line integer: Ending line
----@return	string
--- local permalink = function(start_line, end_line)
--- 	print("Start line " .. start_line)
--- 	print("End line " .. end_line)
---
--- 	return "https://permalink#" .. start_line .. "-" .. end_line
--- end
-
--- print(permalink(1, 2))
-
 M.permalink = function()
+	Helper.fetch_repo_info()
+
 	local start_line = vim.fn.getpos("v")[2]
 	local end_line = vim.fn.getpos(".")[2]
 
 	Helper.notify(string.format("Line range: %d-%d", start_line, end_line))
 
-	Helper.fetch_repo_info()
-
 	local bufname = vim.api.nvim_buf_get_name(0)
-	local relative_path = bufname:match(string.format("^.*%s/(.+)$", Helper.repo_info["repo"]))
-	Helper.notify("relative path: " .. relative_path)
-	print(Helper.build_url(relative_path, start_line, end_line))
+	print("Bufname: " .. bufname)
+
+	local relative_filepath = vim.fn.expand("%:.")
+
+	print("Repo: " .. Helper.repo_info["repo"])
+	local url = Helper.build_url(relative_filepath, start_line, end_line)
+	print(url)
+
+	if M.config.copy_to_reg then
+		vim.fn.setreg(M.config.reg, url)
+	end
 end
 
 ---
----
+
 Helper.fetch_repo_info = function()
 	if not git.is_repo() then
 		Helper.notify("not inside a git repository", "WARN")
@@ -80,19 +77,30 @@ Helper.fetch_repo_info = function()
 end
 
 Helper.build_url = function(file_path, start_line, end_line)
-	local extra = ""
+	local commit_path = ""
+	local platform = git.get_git_platform(Helper.repo_info["host"])
+	if platform == git.Platforms.GITHUB then
+		commit_path = "blob"
+	elseif platform == git.Platforms.CODEBERG then
+		commit_path = "src/commit"
+	end
 
 	-- Markdown files get rendered by default
+	local extra = ""
 	if util.StringEndsWith(file_path, ".md") then
-		-- This only works for codeberg, github has :plain=1
-		extra = extra .. "?display=source"
+		if platform == git.Platforms.GITHUB then
+			extra = extra .. "?plain=1"
+		elseif platform == git.Platforms.CODEBERG then
+			extra = extra .. "?display=source"
+		end
 	end
 
 	return string.format(
-		"https://%s/%s/%s/src/commit/%s/%s%s#L%d-L%d",
+		"https://%s/%s/%s/%s/%s/%s%s#L%d-L%d",
 		Helper.repo_info["host"],
 		Helper.repo_info["user"],
 		Helper.repo_info["repo"],
+		commit_path,
 		Helper.commit_hash,
 		file_path,
 		extra,
