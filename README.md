@@ -1,5 +1,12 @@
 # gitpermalink.nvim
 
+This plugin allows to create a permalink for the visual selection so it can be shared in a fast and easy way.
+
+It currently support two git platforms:
+
+- Github
+- Codeberg
+
 ## Installation
 
 ### Lazy.nvim
