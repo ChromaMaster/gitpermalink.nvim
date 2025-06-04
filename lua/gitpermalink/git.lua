@@ -2,10 +2,10 @@ local util = require("gitpermalink.util")
 
 local M = {}
 
----@enum Platforms
+---@enum gitpermalink.Git.Platforms
 M.Platforms = { GITHUB = 1, CODEBERG = 2 }
 
----@class RepositoryInfo
+---@class gitpermalink.Git.RepositoryInfo
 ---@field host string
 ---@field user string
 ---@field repo string
@@ -34,7 +34,7 @@ M.get_remote = function(name)
 end
 --- Obtain git respository information from a remote
 ---@param remote string
----@return RepositoryInfo
+---@return gitpermalink.Git.RepositoryInfo
 M.parse_remote = function(remote)
 	local host, user, repository
 
@@ -51,7 +51,7 @@ end
 
 --- Gets the git platform (github, codebert, ...) based on the host
 ---@param host string
----@return Platforms
+---@return gitpermalink.Git.Platforms
 M.get_git_platform = function(host)
 	if host:match("github") then
 		return M.Platforms.GITHUB

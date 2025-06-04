@@ -4,6 +4,7 @@ local git = require("gitpermalink.git")
 local M = {}
 local H = {}
 
+---@class gitpermalink.Config
 M.config = {
 	git_executable = "git",
 	notifications = {
@@ -19,7 +20,16 @@ M.config = {
 	},
 }
 
-M.setup = function()
+--- Plugin setup
+---@param opts gitpermalink.Config
+M.setup = function(opts)
+	opts = opts or {}
+
+	--- Override default config
+	for k, v in pairs(opts) do
+		M.config[k] = v
+	end
+
 	-- TODO: Either remove this or mark it as a required dependency
 	M.config.notifications.provider = require("fidget.notification").notify
 
@@ -46,11 +56,11 @@ M.permalink = function()
 	local relative_filepath = vim.fn.expand("%:.")
 
 	H.debug("Repo: " .. H.repo_info["repo"])
-	local url = H.build_url(relative_filepath, start_line, end_line)
-	H.debug(url)
+	local uri = H.build_uri(relative_filepath, start_line, end_line)
+	H.debug(uri)
 
 	if M.config.clipboard.enable then
-		vim.fn.setreg(M.config.clipboard.reg, url)
+		vim.fn.setreg(M.config.clipboard.reg, uri)
 	end
 end
 
@@ -71,6 +81,8 @@ H.notify = function(msg, level)
 	H.config.notifications.provider(msg, level)
 end
 
+--- Prints a message to stdout if debug is enabled
+---@param msg string
 H.debug = function(msg)
 	if not H.config.debug.enable then
 		return
@@ -79,6 +91,7 @@ H.debug = function(msg)
 	print(msg)
 end
 
+--- Fetch and store internally the repository info
 H.fetch_repo_info = function()
 	if not git.is_repo() then
 		H.notify("not inside a git repository", "WARN")
@@ -97,7 +110,12 @@ H.fetch_repo_info = function()
 	H.notify(string.format("Commit hash: %s", H.commit_hash))
 end
 
-H.build_url = function(file_path, start_line, end_line)
+--- Builds the final URI that points to the permalink
+---@param file_path string
+---@param start_line integer
+---@param end_line integer
+---@return string
+H.build_uri = function(file_path, start_line, end_line)
 	local commit_path = ""
 	local platform = git.get_git_platform(H.repo_info["host"])
 	if platform == git.Platforms.GITHUB then
@@ -130,6 +148,9 @@ H.build_url = function(file_path, start_line, end_line)
 	)
 end
 
+--- Prints the given table
+---@param table table<any, any>
+---@param indent integer
 H.dumpTable = function(table, indent)
 	indent = indent or 0
 
