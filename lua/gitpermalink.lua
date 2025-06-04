@@ -1,38 +1,13 @@
 local util = require("gitpermalink.util")
 local git = require("gitpermalink.git")
+local config = require("gitpermalink.config")
 
 local M = {}
 local H = {}
 
----@class gitpermalink.Config
-M.config = {
-	git_executable = "git",
-	notifications = {
-		enable = true,
-		provider = vim.notify,
-	},
-	clipboard = {
-		enable = true,
-		reg = "+",
-	},
-	debug = {
-		enable = true,
-	},
-}
-
---- Plugin setup
 ---@param opts gitpermalink.Config
 M.setup = function(opts)
-	opts = opts or {}
-
-	--- Override default config
-	for k, v in pairs(opts) do
-		M.config[k] = v
-	end
-
-	-- TODO: Either remove this or mark it as a required dependency
-	M.config.notifications.provider = require("fidget.notification").notify
-
+	M.config = config.setup(opts)
 	H.config = vim.deepcopy(M.config)
 
 	-- Ensure git is installed
@@ -42,6 +17,7 @@ M.setup = function(opts)
 	end
 end
 
+--- Generate the permalink and copy it to the clipboard if enabled
 M.permalink = function()
 	H.fetch_repo_info()
 
