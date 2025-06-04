@@ -12,7 +12,7 @@ M.Platforms = { GITHUB = 1, CODEBERG = 2 }
 
 --- Checks whether it's inside a git repository or not
 ---@return boolean
-M.is_repo = function()
+function M.is_repo()
 	local obj = vim.system({ "git", "status" }, { text = false }):wait()
 	-- { code = 0, signal = 0, stdout = '', stderr = '' }
 
@@ -22,7 +22,7 @@ end
 --- Get remote info
 ---@param name string
 ---@return string
-M.get_remote = function(name)
+function M.get_remote(name)
 	local obj = vim.system({ "git", "remote", "get-url", name }, { test = true }):wait()
 	-- { code = 0, signal = 0, stdout = '', stderr = '' }
 
@@ -35,7 +35,7 @@ end
 --- Obtain git respository information from a remote
 ---@param remote string
 ---@return gitpermalink.Git.RepositoryInfo
-M.parse_remote = function(remote)
+function M.parse_remote(remote)
 	local host, user, repository
 
 	if util.StringStartsWith(remote, "https") then
@@ -52,7 +52,7 @@ end
 --- Gets the git platform (github, codebert, ...) based on the host
 ---@param host string
 ---@return gitpermalink.Git.Platforms
-M.get_git_platform = function(host)
+function M.get_git_platform(host)
 	if host:match("github") then
 		return M.Platforms.GITHUB
 	elseif host:match("codeberg") then
@@ -65,7 +65,7 @@ end
 --- Gets the commit hash for the provided refname
 ---@param refname string?: If not provided it will be HEAD
 ---@return string
-M.get_commit_hash = function(refname)
+function M.get_commit_hash(refname)
 	if refname == nil then
 		refname = "HEAD"
 	end

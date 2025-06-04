@@ -4,7 +4,7 @@ local M = {}
 ---@param input string
 ---@param str string
 ---@return boolean
-M.StringStartsWith = function(input, str)
+function M.StringStartsWith(input, str)
 	return input:sub(1, #str) == str
 end
 
@@ -12,7 +12,7 @@ end
 ---@param input string
 ---@param str string
 ---@return boolean
-M.StringEndsWith = function(input, str)
+function M.StringEndsWith(input, str)
 	return input:sub(-#str) == str
 end
 

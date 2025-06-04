@@ -6,7 +6,7 @@ local M = {}
 local H = {}
 
 ---@param opts gitpermalink.Config
-M.setup = function(opts)
+function M.setup(opts)
 	M.config = config.setup(opts)
 	H.config = vim.deepcopy(M.config)
 
@@ -18,7 +18,7 @@ M.setup = function(opts)
 end
 
 --- Generate the permalink and copy it to the clipboard if enabled
-M.permalink = function()
+function M.permalink()
 	H.fetch_repo_info()
 
 	local start_line = vim.fn.getpos("v")[2]
@@ -45,7 +45,7 @@ end
 --- Publish a notification
 ---@param msg string
 ---@param level string|number|nil
-H.notify = function(msg, level)
+function H.notify(msg, level)
 	if not H.config.notifications.enable then
 		return
 	end
@@ -59,7 +59,7 @@ end
 
 --- Prints a message to stdout if debug is enabled
 ---@param msg string
-H.debug = function(msg)
+function H.debug(msg)
 	if not H.config.debug.enable then
 		return
 	end
@@ -68,7 +68,7 @@ H.debug = function(msg)
 end
 
 --- Fetch and store internally the repository info
-H.fetch_repo_info = function()
+function H.fetch_repo_info()
 	if not git.is_repo() then
 		H.notify("not inside a git repository", "WARN")
 
@@ -91,7 +91,7 @@ end
 ---@param start_line integer
 ---@param end_line integer
 ---@return string
-H.build_uri = function(file_path, start_line, end_line)
+function H.build_uri(file_path, start_line, end_line)
 	local commit_path = ""
 	local platform = git.get_git_platform(H.repo_info["host"])
 	if platform == git.Platforms.GITHUB then
@@ -127,7 +127,7 @@ end
 --- Prints the given table
 ---@param table table<any, any>
 ---@param indent integer
-H.dumpTable = function(table, indent)
+function H.dumpTable(table, indent)
 	indent = indent or 0
 
 	for k, v in pairs(table) do
