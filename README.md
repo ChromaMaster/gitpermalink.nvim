@@ -60,3 +60,15 @@ Independently of the plugin configuration, the `permalink` function can be told 
     open: bool,
 }
 ```
+
+## Troubleshooting
+
+### Clipboard not working
+
+If the permalink it's not copied to the system clipboard you might need to [configure neovim's clipboard](https://neovim.io/doc/user/options.html#'clipboard') so it uses a register for it.
+
+You can add the following to your init.lua to configure the `+` register for it.
+
+```lua
+vim.opt.clipboard = "unnamedplus"
+```
