@@ -10,7 +10,7 @@ local M = {}
 local defaults = {
 	git_executable = "git",
 	notifications = {
-		enable = false,
+		enable = true,
 		provider = vim.notify,
 	},
 	clipboard = {

@@ -16,12 +16,12 @@ It currently support two git platforms:
 	"ChromaMaster/gitpermalink.nvim",
 	keys = {
 		{
-			"<leader>gpl",
+			"<leader>gl",
 			function()
-				require("gitpermalink").permalink()
+				require("gitpermalink").permalink({ copy = false, open = true })
 			end,
 			mode = {"n", "v"},
-			desc = "[G]it [P]erma[L]ink",
+			desc = "[G]it Perma[L]ink",
 		},
 	},
 	opts = {},
@@ -36,7 +36,7 @@ It currently support two git platforms:
 {
 	git_executable = "git",
 	notifications = {
-		enable = false,
+		enable = true,
 		provider = vim.notify,
 	},
 	clipboard = {
@@ -46,5 +46,17 @@ It currently support two git platforms:
 	debug = {
 		enable = false,
 	},
+}
+```
+
+### Permalink options
+
+Independently of the plugin configuration, the `permalink` function can be told to copy the link to the defined register or to open it in your default browser or both.
+
+
+```lua
+{
+    copy: bool,
+    open: bool,
 }
 ```

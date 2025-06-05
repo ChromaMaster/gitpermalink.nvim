@@ -5,7 +5,7 @@ local config = require("gitpermalink.config")
 local M = {}
 local H = {}
 
----@param opts gitpermalink.Config
+---@param opts? gitpermalink.Config
 function M.setup(opts)
 	M.config = config.setup(opts)
 	H.config = vim.deepcopy(M.config)
@@ -17,26 +17,40 @@ function M.setup(opts)
 	end
 end
 
+---@class gitpermalink.permalink.Opts
+---@field copy boolean
+---@field open boolean
+
 --- Generate the permalink and copy it to the clipboard if enabled
-function M.permalink()
+---@param opts? gitpermalink.permalink.Opts
+function M.permalink(opts)
+	opts = opts or {}
+
 	H.fetch_repo_info()
 
 	local start_line = vim.fn.getpos("v")[2]
 	local end_line = vim.fn.getpos(".")[2]
-
-	H.notify(string.format("Line range: %d-%d", start_line, end_line))
+	H.debug(string.format("Line range: %d-%d", start_line, end_line))
 
 	local bufname = vim.api.nvim_buf_get_name(0)
 	H.debug("Bufname: " .. bufname)
 
 	local relative_filepath = vim.fn.expand("%:.")
 
-	H.debug("Repo: " .. H.repo_info["repo"])
+	H.debug("Repo: " .. H.repo_info.repo)
 	local uri = H.build_uri(relative_filepath, start_line, end_line)
 	H.debug(uri)
 
-	if M.config.clipboard.enable then
+	-- function opts should prevail
+	local copy = opts.copy or M.config.clipboard.enable
+	if copy then
 		vim.fn.setreg(M.config.clipboard.reg, uri)
+		H.notify(string.format("URI copied to the '%s' register: %s", M.config.clipboard.reg, uri))
+	end
+
+	if opts.open then
+		H.open(uri)
+		H.notify(string.format("URI opened in your preferred browser: %s", uri))
 	end
 end
 
@@ -50,11 +64,20 @@ function H.notify(msg, level)
 		return
 	end
 
-	if level == nil then
-		level = "INFO"
-	end
+	level = level or "INFO"
 
 	H.config.notifications.provider(msg, level)
+end
+
+--- Opens the uri
+---@param uri string
+function H.open(uri)
+	local cmd, err = vim.ui.open(uri)
+	if cmd then
+		cmd:wait()
+	else
+		H.notify(string.format("Could not open the uri: %s", err))
+	end
 end
 
 --- Prints a message to stdout if debug is enabled
@@ -79,11 +102,11 @@ function H.fetch_repo_info()
 	H.repo_info = git.parse_remote(remote)
 	H.commit_hash = git.get_commit_hash("HEAD")
 
-	H.notify(string.format("Remote: %s", remote))
-	H.notify(
+	H.debug(string.format("Remote: %s", remote))
+	H.debug(
 		string.format("host: %s, user: %s, repo: %s", H.repo_info["host"], H.repo_info["user"], H.repo_info["repo"])
 	)
-	H.notify(string.format("Commit hash: %s", H.commit_hash))
+	H.debug(string.format("Commit hash: %s", H.commit_hash))
 end
 
 --- Builds the final URI that points to the permalink
