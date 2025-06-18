@@ -36,6 +36,7 @@ function M.permalink(opts)
 	H.debug("Bufname: " .. bufname)
 
 	local relative_filepath = vim.fn.expand("%:.")
+	H.debug("Relative filepath: " .. relative_filepath)
 
 	H.debug("Repo: " .. H.repo_info.repo)
 	local uri = H.build_uri(relative_filepath, start_line, end_line)
@@ -106,7 +107,7 @@ function H.fetch_repo_info()
 	H.debug(
 		string.format("host: %s, user: %s, repo: %s", H.repo_info["host"], H.repo_info["user"], H.repo_info["repo"])
 	)
-	H.debug(string.format("Commit hash: %s", H.commit_hash))
+	H.debug(string.format("Commit hash: '%s'", H.commit_hash))
 end
 
 --- Builds the final URI that points to the permalink

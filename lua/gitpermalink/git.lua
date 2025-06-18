@@ -16,21 +16,21 @@ function M.is_repo()
 	local obj = vim.system({ "git", "status" }, { text = false }):wait()
 	-- { code = 0, signal = 0, stdout = '', stderr = '' }
 
-	return obj["code"] == 0
+	return obj.code == 0
 end
 
 --- Get remote info
 ---@param name string
 ---@return string
 function M.get_remote(name)
-	local obj = vim.system({ "git", "remote", "get-url", name }, { test = true }):wait()
+	local obj = vim.system({ "git", "remote", "get-url", name }, { text = true }):wait()
 	-- { code = 0, signal = 0, stdout = '', stderr = '' }
 
-	if obj["code"] ~= 0 then
-		error(obj["stderr"])
+	if obj.code ~= 0 then
+		error(obj.stderr)
 	end
 
-	return obj["stdout"]
+	return obj.stdout
 end
 --- Obtain git respository information from a remote
 ---@param remote string
@@ -70,13 +70,17 @@ function M.get_commit_hash(refname)
 		refname = "HEAD"
 	end
 
-	local obj = vim.system({ "git", "rev-parse", refname }, { test = true }):wait()
+	local obj = vim.system({ "git", "rev-parse", refname }, { text = true }):wait()
 
-	if obj["code"] ~= 0 then
-		error(obj["stderr"])
+	if obj.code ~= 0 then
+		error(obj.stderr)
 	end
 
-	return obj["stdout"]
+	local commit_hash = obj.stdout
+	commit_hash = util.StringStrip(commit_hash, " ")
+	commit_hash = util.StringStrip(commit_hash, "\n")
+
+	return commit_hash
 end
 
 return M
